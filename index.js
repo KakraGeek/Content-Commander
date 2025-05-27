@@ -5,12 +5,14 @@ import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import searchCommand from './src/commands/search.js';
+import filterCommand from './src/commands/filter.js';
+import updateCommand from './src/commands/update.js';
+import deleteCommand from './src/commands/delete.js';
 
 // Get the directory name in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Your command-line program setup here
 program
   .version('1.0.0')
   .description('Content Commander - A CLI tool to manage your content ideas')
@@ -18,11 +20,11 @@ program
   .option('-s, --small', 'small pizza size')
   .option('-p, --pizza-type <type>', 'flavour of pizza');
 
-// Define the add command
+// Add command
 program
   .command('add')
   .description('Add a new content idea')
-  .action(async (options) => {
+  .action(async () => {
     const answers = await inquirer.prompt([
       {
         type: 'input',
@@ -49,11 +51,9 @@ program
 
     try {
       await fs.ensureDir(path.dirname(dataPath));
-      
       if (await fs.pathExists(dataPath)) {
         try {
           const fileData = await fs.readFile(dataPath, 'utf8');
-          // Only try to parse if the file isn't empty
           if (fileData.trim()) {
             ideas = JSON.parse(fileData);
           }
@@ -62,8 +62,6 @@ program
           ideas = [];
         }
       }
-      
-      // Ensure ideas is an array
       if (!Array.isArray(ideas)) {
         ideas = [];
       }
@@ -86,7 +84,7 @@ program
     }
   });
 
-// Define the list command
+// List command
 program
   .command('list')
   .description('List all content ideas')
@@ -94,26 +92,20 @@ program
   .option('-r, --reverse', 'Reverse the sort order')
   .action(async (options) => {
     const dataPath = path.join(process.cwd(), 'data', 'ideas.json');
-    
     try {
       if (!await fs.pathExists(dataPath)) {
         console.log(chalk.yellow('No content ideas found. Use "add" command to create some!'));
         return;
       }
-
       const fileData = await fs.readFile(dataPath, 'utf8');
       let ideas = [];
-      
       if (fileData.trim()) {
         ideas = JSON.parse(fileData);
       }
-
       if (ideas.length === 0) {
         console.log(chalk.yellow('No content ideas found. Use "add" command to create some!'));
         return;
       }
-
-      // Sort ideas
       ideas.sort((a, b) => {
         let comparison = 0;
         if (options.sort === 'createdAt') {
@@ -123,30 +115,50 @@ program
         }
         return options.reverse ? -comparison : comparison;
       });
-
-      // Display ideas
       console.log(chalk.blue('\nYour Content Ideas:'));
       console.log(chalk.gray('─'.repeat(80)));
-      
       ideas.forEach((idea, index) => {
         console.log(chalk.cyan(`\n${index + 1}. ${idea.title}`));
+        console.log(chalk.gray('ID:'), chalk.yellow(idea.id));
         console.log(chalk.gray('Type:'), chalk.yellow(idea.type));
         console.log(chalk.gray('Created:'), chalk.yellow(new Date(idea.createdAt).toLocaleString()));
         console.log(chalk.gray('Description:'), idea.description);
         console.log(chalk.gray('─'.repeat(80)));
       });
-
       console.log(chalk.green(`\nTotal ideas: ${ideas.length}`));
     } catch (error) {
       console.error(chalk.red('Error reading content ideas:'), error);
     }
   });
 
+// Search command
 program
   .command('search')
   .description('Search your content ideas')
   .argument('[query]', 'Search query')
   .action(searchCommand);
+
+// Filter command
+program
+  .command('filter')
+  .description('Filter content ideas by type, status, or tag')
+  .option('-t, --type <type>', 'Filter by content type')
+  .option('-s, --status <status>', 'Filter by status')
+  .option('-g, --tag <tag>', 'Filter by tag')
+  .action(filterCommand);
+
+// Update command
+program
+  .command('update')
+  .description('Update an existing content idea (e.g. change status or tags)')
+  .argument('<id>', 'ID of the content idea to update')
+  .action(updateCommand);
+
+// Delete command
+program
+  .command('delete <id>')
+  .description('Delete a content idea by ID')
+  .action(deleteCommand);
 
 // This must be after ALL command definitions:
 program.parse(process.argv);
@@ -154,10 +166,4 @@ program.parse(process.argv);
 // Show help if no arguments provided
 if (!process.argv.slice(2).length) {
   program.outputHelp();
-}
-
-// Handle global options
-const options = program.opts();
-if (options.debug) console.log('Debug mode is on');
-if (options.small) console.log('- small pizza size');
-if (options.pizzaType) console.log(`- ${options.pizzaType} pizza`);
+} 
