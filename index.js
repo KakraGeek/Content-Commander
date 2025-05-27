@@ -4,6 +4,7 @@ import inquirer from 'inquirer';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import searchCommand from './src/commands/search.js';
 
 // Get the directory name in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -141,7 +142,13 @@ program
     }
   });
 
-// Parse arguments (only once, after all commands are defined)
+program
+  .command('search')
+  .description('Search your content ideas')
+  .argument('[query]', 'Search query')
+  .action(searchCommand);
+
+// This must be after ALL command definitions:
 program.parse(process.argv);
 
 // Show help if no arguments provided
