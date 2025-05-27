@@ -90,6 +90,62 @@ program
     }
   });
 
+// Define the list command
+program
+  .command('list')
+  .description('List all content ideas')
+  .option('-s, --sort <field>', 'Sort by field (title, type, createdAt)', 'createdAt')
+  .option('-r, --reverse', 'Reverse the sort order')
+  .action(async (options) => {
+    const dataPath = path.join(process.cwd(), 'data', 'ideas.json');
+    
+    try {
+      if (!await fs.pathExists(dataPath)) {
+        console.log(chalk.yellow('No content ideas found. Use "add" command to create some!'));
+        return;
+      }
+
+      const fileData = await fs.readFile(dataPath, 'utf8');
+      let ideas = [];
+      
+      if (fileData.trim()) {
+        ideas = JSON.parse(fileData);
+      }
+
+      if (ideas.length === 0) {
+        console.log(chalk.yellow('No content ideas found. Use "add" command to create some!'));
+        return;
+      }
+
+      // Sort ideas
+      ideas.sort((a, b) => {
+        let comparison = 0;
+        if (options.sort === 'createdAt') {
+          comparison = new Date(a.createdAt) - new Date(b.createdAt);
+        } else {
+          comparison = String(a[options.sort]).localeCompare(String(b[options.sort]));
+        }
+        return options.reverse ? -comparison : comparison;
+      });
+
+      // Display ideas
+      console.log(chalk.blue('\nYour Content Ideas:'));
+      console.log(chalk.gray('─'.repeat(80)));
+      
+      ideas.forEach((idea, index) => {
+        console.log(chalk.cyan(`\n${index + 1}. ${idea.title}`));
+        console.log(chalk.gray('Type:'), chalk.yellow(idea.type));
+        console.log(chalk.gray('Created:'), chalk.yellow(new Date(idea.createdAt).toLocaleString()));
+        console.log(chalk.gray('Description:'), idea.description);
+        console.log(chalk.gray('─'.repeat(80)));
+      });
+
+      console.log(chalk.green(`\nTotal ideas: ${ideas.length}`));
+    } catch (error) {
+      console.error(chalk.red('Error reading content ideas:'), error);
+    }
+  });
+
 // Parse arguments (only once, after all commands are defined)
 program.parse(process.argv);
 
