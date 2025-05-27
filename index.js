@@ -21,12 +21,7 @@ program
 program
   .command('add')
   .description('Add a new content idea')
-  .option('--option <option>', 'An option for the add command (optional)')
   .action(async (options) => {
-    if (options.option) {
-      console.log('Option provided:', options.option);
-    }
-
     const answers = await inquirer.prompt([
       {
         type: 'input',

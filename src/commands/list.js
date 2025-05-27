@@ -17,8 +17,6 @@ module.exports = async () => {
       console.log(chalk.bold(`Title: ${idea.title}`));
       console.log(`Description: ${idea.description}`);
       console.log(`Type: ${idea.type}`);
-      console.log(`Status: ${idea.status || 'Not set'}`);
-      console.log(`Tags: ${(idea.tags && idea.tags.length) ? idea.tags.join(', ') : 'None'}`);
       console.log(`ID: ${idea.id}`);
       console.log(`Created: ${new Date(idea.createdAt).toLocaleString()}`);
       console.log(chalk.cyan('--------------------------------------') + '\\n');
