@@ -131,6 +131,15 @@ program
     }
   });
 
+// Insert a new command block for 'calendar' (alias to list) after the list command block.
+program
+  .command('calendar')
+  .description('Alias for "list" – prints a list of content ideas sorted by creation date (calendar view)')
+  .action(() => {
+    // Invoke the list command (which is already registered) so that "node index.js calendar" behaves like "node index.js list".
+    program.parse(['node', 'index.js', 'list']);
+  });
+
 // Search command
 program
   .command('search')

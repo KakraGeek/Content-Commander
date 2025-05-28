@@ -23,6 +23,7 @@ export default async () => {
         console.log(`Created: ${new Date(idea.createdAt).toLocaleString()}`);
         console.log(chalk.cyan('--------------------------------------') + '\n');
       });
+      console.log(`Due Date: ${idea.dueDate ? new Date(idea.dueDate).toLocaleDateString() : 'Not set'}`);
   } catch (error) {
     console.error(chalk.red('Error loading content ideas:'), error.message);
   }
