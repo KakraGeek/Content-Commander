@@ -171,6 +171,11 @@ program
   .description('Delete a content idea by ID')
   .action(deleteCommand);
 
+  program
+  .command('help')
+  .description('Display help information')
+  .action(async () => { const helpCommand = await import('./src/commands/help.js'); helpCommand.default(); });
+
 // This must be after ALL command definitions:
 program.parse(process.argv);
 
