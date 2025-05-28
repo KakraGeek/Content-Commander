@@ -89,49 +89,8 @@ program
 // List command
 program
   .command('list')
-  .description('List all content ideas')
-  .option('-s, --sort <field>', 'Sort by field (title, type, createdAt)', 'createdAt')
-  .option('-r, --reverse', 'Reverse the sort order')
-  .action(async (options) => {
-    const dataPath = path.join(process.cwd(), 'data', 'ideas.json');
-    try {
-      if (!await fs.pathExists(dataPath)) {
-        console.log(chalk.yellow('No content ideas found. Use "add" command to create some!'));
-        return;
-      }
-      const fileData = await fs.readFile(dataPath, 'utf8');
-      let ideas = [];
-      if (fileData.trim()) {
-        ideas = JSON.parse(fileData);
-      }
-      if (ideas.length === 0) {
-        console.log(chalk.yellow('No content ideas found. Use "add" command to create some!'));
-        return;
-      }
-      ideas.sort((a, b) => {
-        let comparison = 0;
-        if (options.sort === 'createdAt') {
-          comparison = new Date(a.createdAt) - new Date(b.createdAt);
-        } else {
-          comparison = String(a[options.sort]).localeCompare(String(b[options.sort]));
-        }
-        return options.reverse ? -comparison : comparison;
-      });
-      console.log(chalk.blue('\nYour Content Ideas:'));
-      console.log(chalk.gray('─'.repeat(80)));
-      ideas.forEach((idea, index) => {
-        console.log(chalk.cyan(`\n${index + 1}. ${idea.title}`));
-        console.log(chalk.gray('ID:'), chalk.yellow(idea.id));
-        console.log(chalk.gray('Type:'), chalk.yellow(idea.type));
-        console.log(chalk.gray('Created:'), chalk.yellow(new Date(idea.createdAt).toLocaleString()));
-        console.log(chalk.gray('Description:'), idea.description);
-        console.log(chalk.gray('─'.repeat(80)));
-      });
-      console.log(chalk.green(`\nTotal ideas: ${ideas.length}`));
-    } catch (error) {
-      console.error(chalk.red('Error reading content ideas:'), error);
-    }
-  });
+  .description('List all available commands')
+  .action(async () => { (await import('./src/commands/list.js')).default(); });
 
 // Insert a new command block for 'calendar' (alias to list) after the list command block.
 program
@@ -186,6 +145,11 @@ program
   .description('Search for images using Unsplash API')
   .argument('[query]', 'Search query for images')
   .action(async (query) => { (await import('./src/commands/images.js')).default(query); });
+
+  program
+  .command('outline <id>')
+  .description('Generate an outline for a content idea')
+  .action(async (id) => { (await import('./src/commands/outline.js')).default(id); });
 
 // This must be after ALL command definitions:
 program.parse(process.argv);
