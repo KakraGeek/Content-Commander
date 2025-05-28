@@ -1,5 +1,6 @@
 import chalk from 'chalk';
-import { getIdeaById } from '../utils.js';
+import inquirer from 'inquirer';
+import { getIdeaById, getIdeas, saveIdeas } from '../utils.js';
 import outlineGenerator from '../services/outline-generator.js';
 
 export default async (id) => {
@@ -10,14 +11,16 @@ export default async (id) => {
   }
 
   try {
-    // Get the content idea
-    const idea = await getIdeaById(id);
+    // Get all ideas and find the specific one
+    const ideas = await getIdeas();
+    const ideaIndex = ideas.findIndex(idea => idea.id === id);
     
-    if (!idea) {
+    if (ideaIndex === -1) {
       console.log(chalk.yellow(`No content idea found with ID: ${id}`));
       return;
     }
     
+    const idea = ideas[ideaIndex];
     console.log(chalk.bold(`Generating outline for "${idea.title}"\n`));
     
     // Generate outline
@@ -38,7 +41,37 @@ export default async (id) => {
       console.log(`   ${section.content.replace(/\n/g, '\n   ')}\n`);
     });
     
+    // Ask if the user wants to save the outline
+    const { shouldSave } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'shouldSave',
+        message: 'Would you like to save this outline?',
+        default: true
+      }
+    ]);
+    
+    if (shouldSave) {
+      // Add the outline to the idea
+      if (!idea.outlines) {
+        idea.outlines = [];
+      }
+      
+      const savedOutline = {
+        id: Date.now().toString(),
+        title: outline.title,
+        createdAt: new Date().toISOString(),
+        sections: outline.sections
+      };
+      
+      idea.outlines.push(savedOutline);
+      
+      // Save the updated ideas array
+      await saveIdeas(ideas);
+      
+      console.log(chalk.green('\n✓ Outline saved successfully!'));
+    }
   } catch (error) {
     console.error(chalk.red('Error generating outline:'), error.message);
   }
-}; 
+};
