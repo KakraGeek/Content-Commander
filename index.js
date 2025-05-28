@@ -176,6 +176,11 @@ program
   .description('Display help information')
   .action(async () => { const helpCommand = await import('./src/commands/help.js'); helpCommand.default(); });
 
+  program
+  .command('setup')
+  .description('Configure Content Commander settings')
+  .action(async () => { (await import('./src/commands/setup.js')).default(); });
+
 // This must be after ALL command definitions:
 program.parse(process.argv);
 

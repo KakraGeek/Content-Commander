@@ -1,8 +1,10 @@
+import configUtil from './config.js';
+
 import fs from 'fs-extra';
 import path from 'path';
 import { handleError } from './errorHandler.js';
 
-const dataDir = path.join(process.cwd(), 'data');
+const dataDir = path.join(process.cwd(), configUtil.get('data.directory', 'data'));
 const ideasPath = path.join(dataDir, 'ideas.json');
 
 export async function getIdeas() {
