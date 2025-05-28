@@ -181,6 +181,12 @@ program
   .description('Configure Content Commander settings')
   .action(async () => { (await import('./src/commands/setup.js')).default(); });
 
+  program
+  .command('images')
+  .description('Search for images using Unsplash API')
+  .argument('[query]', 'Search query for images')
+  .action(async (query) => { (await import('./src/commands/images.js')).default(query); });
+
 // This must be after ALL command definitions:
 program.parse(process.argv);
 

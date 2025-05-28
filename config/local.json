@@ -1,0 +1,14 @@
+{
+  "user": {
+    "name": "Desmond"
+  },
+  "apis": {
+    "unsplash": {
+      "accessKey": "HRUIYo4hsqyqEDQPVcuFoJsWJ33tFUyeIgRGyjtzaRM"
+    }
+  },
+  "export": {
+    "defaultFormat": "markdown",
+    "outputDir": "exports"
+  }
+}
